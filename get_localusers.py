@@ -62,6 +62,10 @@ def check_config(clearpass_fqdn, oauth_grant_type, oauth_client_id, oauth_client
         exit(1)
 
 
+####################################################################
+###  AUTHENTICATION TO CLEARPASS
+####################################################################
+
 def get_access_token(clearpass_fqdn, oauth_grant_type, oauth_client_id, oauth_client_secret, oauth_username, oauth_password):
     """Get OAuth 2.0 access token with config from params.cfg"""
 
