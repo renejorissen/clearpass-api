@@ -178,4 +178,4 @@ get_local_user = requests.get(url, headers=headers)
 #pprint.pprint(get_local_user.json())
 
 for key in get_local_user.json()['_embedded']['items']:
-        print("User ID{:<1} has username: {}".format(key['user_id'], key['username']))
+        print("User ID: {:<15} has username: {:<18} and role: {}".format(key['user_id'], key['username'], key['role_name']))
