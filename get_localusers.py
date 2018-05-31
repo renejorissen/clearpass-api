@@ -1,27 +1,8 @@
 #!/usr/bin/env python3
 #------------------------------------------------------------------------------
 #
-# Author: @timcappalli, Aruba Security Group
-# Organization: Aruba, a Hewlett Packard Enterprise company
-#
-# Version: 2017.03
-#
-#
-# Copyright (c) Hewlett Packard Enterprise Development LP
-# All Rights Reserved
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-# http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing,
-# software distributed under the License is distributed on an
-# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the License for the
-# specific language governing permissions and limitations
-# under the License.
+# Script to list Local Users, Role and/or
+# Add / Delete Local Users
 #
 #------------------------------------------------------------------------------
 
@@ -29,7 +10,10 @@ import requests
 import json
 from configparser import ConfigParser
 import os
+import urllib3
 import pprint
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # configuration file parameters
 params = os.path.join(os.path.dirname(__file__), "config/params.cfg")
@@ -76,8 +60,9 @@ def get_access_token(clearpass_fqdn, oauth_grant_type, oauth_client_id, oauth_cl
     # grant_type: password
     if oauth_grant_type == "password":
         payload = {'grant_type':oauth_grant_type, 'username':oauth_username, 'password':oauth_password, 'client_id':oauth_client_id, 'client_secret':oauth_client_secret}
+        #print(payload)
         try:
-            r = requests.post(url, headers=headers, json=payload)
+            r = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
             r.raise_for_status()
         except Exception as e:
             print(e)
@@ -92,7 +77,7 @@ def get_access_token(clearpass_fqdn, oauth_grant_type, oauth_client_id, oauth_cl
         payload = {'grant_type':oauth_grant_type, 'username':oauth_username, 'password':oauth_password, 'client_id':oauth_client_id}
 
         try:
-            r = requests.post(url, headers=headers, json=payload)
+            r = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
             r.raise_for_status()
         except Exception as e:
             print(e)
@@ -107,7 +92,7 @@ def get_access_token(clearpass_fqdn, oauth_grant_type, oauth_client_id, oauth_cl
         payload = {'grant_type': oauth_grant_type, 'client_id': oauth_client_id, 'client_secret': oauth_client_secret}
 
         try:
-            r = requests.post(url, headers=headers, json=payload)
+            r = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
             r.raise_for_status()
         except Exception as e:
             print(e)
@@ -125,7 +110,7 @@ def get_api_role(clearpass_fqdn, token_type, access_token):
     headers = {'Content-Type':'application/json', "Authorization": "{} {}".format(token_type, access_token)}
 
     try:
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers, verify=False, timeout=2)
         r.raise_for_status()
     except Exception as e:
         print(e)
@@ -144,7 +129,7 @@ def get_privs(clearpass_fqdn, token_type, access_token):
     headers = {'Content-Type':'application/json', "Authorization": "{} {}".format(token_type, access_token)}
 
     try:
-        r = requests.get(url, headers=headers)
+        r = requests.get(url, headers=headers, verify=False, timeout=2)
         r.raise_for_status()
     except Exception as e:
         print(e)
@@ -174,12 +159,132 @@ api_privs = get_privs_response['privileges']
 ###  PRINT LOCAL USERS
 ####################################################################
 
-url = "https://" + clearpass_fqdn + "/api/local-user"
-headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
+while True:
+        print_user = str(input('Get all local users (y/n)? '))
+        if print_user.lower() not in ('y' , 'n'):
+            print("Not an appropriate choice. Choose 'y' or 'n'!")
+        else:
+            break
 
-get_local_user = requests.get(url, headers=headers)
+if print_user == 'y':
+    url = "https://" + clearpass_fqdn + "/api/local-user"
+    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
+    get_local_user = requests.get(url, headers=headers, verify=False, timeout=2)
+    # pprint.pprint(get_local_user.json())
+    print("")
+    print("CONFIGURED LOCAL USERS")
+    print("=====================")
+    for key in get_local_user.json()['_embedded']['items']:
+        print("User ID: {:<15} has username: {:<18} and role: {}".format(key['user_id'], key['username'],
+                                                                         key['role_name']))
+    print("")
+else:
+    print("")
+    print("OKAY, LET'S MOVE ON!!")
+    print("")
 
-#pprint.pprint(get_local_user.json())
 
-for key in get_local_user.json()['_embedded']['items']:
-        print("User ID: {:<15} has username: {:<18} and role: {}".format(key['user_id'], key['username'], key['role_name']))
+
+####################################################################
+###  PRINT ROLES
+####################################################################
+
+while True:
+        print_role = str(input('Get all roles (y/n)? '))
+        if print_role.lower() not in ('y' , 'n'):
+            print("Not an appropriate choice. Choose 'y' or 'n'!")
+        else:
+            break
+
+if print_role == 'y':
+    url = "https://" + clearpass_fqdn + "/api/role"
+    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
+    get_roles = requests.get(url, headers=headers, verify=False, timeout=2)
+    print("")
+    # pprint.pprint(get_roles.json())
+    print("CONFIGURED ROLES")
+    print("================")
+    for key in get_roles.json()['_embedded']['items']:
+        print("Role ID: {:<7} has name: {:<10}".format(key['id'], key['name']))
+else:
+    print("")
+    print("OKAY, LET'S MOVE ON!!")
+
+
+####################################################################
+###  ADD A USER
+####################################################################
+
+print("")
+print("LET US ADD A LOCAL USER")
+print("=======================")
+print("")
+
+while True:
+        add_user = str(input('Would you like to add a new user (y/n): '))
+        if add_user.lower() not in ('y' , 'n'):
+            print("Not an appropriate choice. Choose 'y' or 'n'!")
+        else:
+            break
+
+if add_user == 'y':
+    get_username = str(input('Provide username: '))
+    get_password = str(input('Provide password: '))
+    get_rolename = str(input('Provide role name: '))
+    url = "https://" + clearpass_fqdn + "/api/local-user"
+    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
+    payload = {'user_id': get_username, 'username': get_username, 'password': get_password, 'role_name': get_rolename}
+    while True:
+        post_user = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
+        if post_user.status_code == 201:
+            print("USER {} WAS CREATED SUCCESSFULLY".format(get_username))
+            break
+        else:
+            print("SOMETHING WENT WRONG! ERROR CODE = {}".format(post_user.status_code))
+            print("")
+            print("401 - Unauthorized")
+            print("403 - Forbidden")
+            print("406 - Not Acceptable")
+            print("415 - Unsupported Media Type")
+            print("422 - Unprocessable Entity")
+            print("")
+            print("LETS TRY AGAIN")
+            print("")
+            break
+else:
+    print("")
+    print("OKAY, LET'S MOVE ON!!")
+
+
+####################################################################
+###  REMOVE A USER
+####################################################################
+
+print("")
+print("LET US REMOVE A LOCAL USER")
+print("=======================")
+print("")
+
+while True:
+        add_user = str(input('Would you like to remove a user (y/n): '))
+        if add_user.lower() not in ('y' , 'n'):
+            print("Not an appropriate choice. Choose 'y' or 'n'!")
+        else:
+            break
+
+if add_user == 'y':
+    get_username = str(input('Provide User ID: '))
+    url = "https://" + clearpass_fqdn + "/api/local-user/user-id/" + get_username
+    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
+    while True:
+        delete_user = requests.delete(url, headers=headers, verify=False, timeout=2)
+        if delete_user.status_code == 204:
+            print("USER {} WAS DELETE SUCCESSFULLY".format(get_username))
+            break
+        else:
+            print("SOMETHING WENT WRONG! ERROR CODE = {}".format(delete_user.status_code))
+            print("")
+            break
+else:
+    print("")
+    print("OKAY, NO PROBLEM. GOODBYE!!")
