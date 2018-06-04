@@ -11,12 +11,13 @@ import json
 from configparser import ConfigParser
 import os
 import urllib3
+import csv
 import pprint
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # configuration file parameters
-params = os.path.join(os.path.dirname(__file__), "config/params.cfg")
+params = os.path.join(os.path.dirname(__file__), "../config/params.cfg")
 config = ConfigParser()
 config.read(params)
 
@@ -156,135 +157,52 @@ api_privs = get_privs_response['privileges']
 
 
 ####################################################################
-###  PRINT LOCAL USERS
-####################################################################
-
-while True:
-        print_user = str(input('Get all local users (y/n)? '))
-        if print_user.lower() not in ('y' , 'n'):
-            print("Not an appropriate choice. Choose 'y' or 'n'!")
-        else:
-            break
-
-if print_user == 'y':
-    url = "https://" + clearpass_fqdn + "/api/local-user"
-    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
-    get_local_user = requests.get(url, headers=headers, verify=False, timeout=2)
-    # pprint.pprint(get_local_user.json())
-    print("")
-    print("CONFIGURED LOCAL USERS")
-    print("=====================")
-    for key in get_local_user.json()['_embedded']['items']:
-        print("User ID: {:<15} has username: {:<18} and role: {}".format(key['user_id'], key['username'],
-                                                                         key['role_name']))
-    print("")
-else:
-    print("")
-    print("OKAY, LET'S MOVE ON!!")
-    print("")
-
-
-
-####################################################################
-###  PRINT ROLES
-####################################################################
-
-while True:
-        print_role = str(input('Get all roles (y/n)? '))
-        if print_role.lower() not in ('y' , 'n'):
-            print("Not an appropriate choice. Choose 'y' or 'n'!")
-        else:
-            break
-
-if print_role == 'y':
-    url = "https://" + clearpass_fqdn + "/api/role"
-    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
-    get_roles = requests.get(url, headers=headers, verify=False, timeout=2)
-    print("")
-    # pprint.pprint(get_roles.json())
-    print("CONFIGURED ROLES")
-    print("================")
-    for key in get_roles.json()['_embedded']['items']:
-        print("Role ID: {:<7} has name: {:<10}".format(key['id'], key['name']))
-else:
-    print("")
-    print("OKAY, LET'S MOVE ON!!")
-
-
-####################################################################
 ###  ADD A USER
 ####################################################################
 
 print("")
-print("LET US ADD A LOCAL USER")
+print("LET US ADD THE LOCAL USER")
 print("=======================")
 print("")
 
-while True:
-        add_user = str(input('Would you like to add a new user (y/n): '))
-        if add_user.lower() not in ('y' , 'n'):
-            print("Not an appropriate choice. Choose 'y' or 'n'!")
-        else:
-            break
+### IMPORT THE CSV FILE
+### CSV FILE CREATED IN EXCEL 2016 AND SAVED AS "CSV (Comma delimited)(*.csv)
 
-if add_user == 'y':
-    get_username = str(input('Provide username: '))
-    get_password = str(input('Provide password: '))
-    get_rolename = str(input('Provide role name: '))
-    url = "https://" + clearpass_fqdn + "/api/local-user"
-    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
-    payload = {'user_id': get_username, 'username': get_username, 'password': get_password, 'role_name': get_rolename}
-    while True:
-        post_user = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
-        if post_user.status_code == 201:
-            print("USER {} WAS CREATED SUCCESSFULLY".format(get_username))
-            break
-        else:
-            print("SOMETHING WENT WRONG! ERROR CODE = {}".format(post_user.status_code))
-            print("")
-            print("401 - Unauthorized")
-            print("403 - Forbidden")
-            print("406 - Not Acceptable")
-            print("415 - Unsupported Media Type")
-            print("422 - Unprocessable Entity")
-            print("")
-            print("LETS TRY AGAIN")
-            print("")
-            break
-else:
-    print("")
-    print("OKAY, LET'S MOVE ON!!")
+### WHEN OPENED WITH NOTEPAD THE CONTENT IS
+### userid;username;password;rolename
+### test1;username1;password1;[Other]
+### test2;username2;password2;[Guest]
+with open('localusers.csv', 'r') as file:
+    reader = csv.DictReader(file, delimiter=';')
+    user_list = []
+    for line in reader:
+        user_list.append(line)
 
+        ### DEFINE BASE URL FOR ADDING LOCAL USERS
+        url = "https://" + clearpass_fqdn + "/api/local-user"
 
-####################################################################
-###  REMOVE A USER
-####################################################################
+        ### DEFINE THE HEADER PARAMETERS
+        headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
 
-print("")
-print("LET US REMOVE A LOCAL USER")
-print("=======================")
-print("")
+        ### DEFINE THE PAYLOAD
+        payload = {'user_id': line['userid'], 'username': line['username'] 'password': line['password'],
+                   'role_name': line['rolename']}
 
-while True:
-        add_user = str(input('Would you like to remove a user (y/n): '))
-        if add_user.lower() not in ('y' , 'n'):
-            print("Not an appropriate choice. Choose 'y' or 'n'!")
-        else:
-            break
-
-if add_user == 'y':
-    get_username = str(input('Provide User ID: '))
-    url = "https://" + clearpass_fqdn + "/api/local-user/user-id/" + get_username
-    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
-    while True:
-        delete_user = requests.delete(url, headers=headers, verify=False, timeout=2)
-        if delete_user.status_code == 204:
-            print("USER {} WAS DELETE SUCCESSFULLY".format(get_username))
-            break
-        else:
-            print("SOMETHING WENT WRONG! ERROR CODE = {}".format(delete_user.status_code))
-            print("")
-            break
-else:
-    print("")
-    print("OKAY, NO PROBLEM. GOODBYE!!")
+        ### ADD THE USER
+        while True:
+            post_user = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
+            if post_user.status_code == 201:
+                print("USER {} WAS CREATED SUCCESSFULLY".format(get_username))
+                break
+            else:
+                print("SOMETHING WENT WRONG! ERROR CODE = {}".format(post_user.status_code))
+                print("")
+                print("401 - Unauthorized")
+                print("403 - Forbidden")
+                print("406 - Not Acceptable")
+                print("415 - Unsupported Media Type")
+                print("422 - Unprocessable Entity")
+                print("")
+                print("LETS TRY AGAIN")
+                print("")
+                break
