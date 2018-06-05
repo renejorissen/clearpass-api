@@ -1,0 +1,5 @@
+userid;username;password;rolename
+testuser;Mr Test;thisisthepassword;[Employee]
+thedonald;Mr President;whatajokeami;[Contractor]
+arnie;The Governator;GetToTheChoppa;[Contractor]
+sly;Sylvester;ItalianStallion;[Other]
