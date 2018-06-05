@@ -17,7 +17,7 @@ def password():
     strong = uppercase + lowercase + number + symbols
 
     generated_password = "".join(random.sample(strong, 15))
-    print(generated_password)
+    #print(generated_password)
 
 if __name__ == "__main__":
     password()
