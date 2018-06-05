@@ -16,7 +16,7 @@ import pprint
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # configuration file parameters
-params = os.path.join(os.path.dirname(__file__), "config/params.cfg")
+params = os.path.join(os.path.dirname(__file__), "../config/params.cfg")
 config = ConfigParser()
 config.read(params)
 
