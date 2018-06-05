@@ -190,6 +190,7 @@ with open('localusers.csv', 'r') as file:
         while True:
             post_user = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
             if post_user.status_code == 201:
+
                 print("USER {} WAS CREATED SUCCESSFULLY".format(line['userid']))
                 print("")
                 break
