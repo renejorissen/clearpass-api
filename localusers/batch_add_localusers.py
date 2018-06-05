@@ -2,6 +2,7 @@
 #------------------------------------------------------------------------------
 #
 # Script to import LocalUsers from a CSV file
+# Password is generated via Password Generator module and printed to screen
 #
 #------------------------------------------------------------------------------
 
@@ -12,6 +13,9 @@ import os
 import urllib3
 import csv
 import pprint
+import string
+import random
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -160,38 +164,64 @@ api_privs = get_privs_response['privileges']
 ####################################################################
 
 print("")
-print("LET US ADD THE LOCAL USER")
-print("=======================")
+print("LET US ADD THE LOCAL USER(S)")
+print("============================")
 print("")
 
+#####################################################################
 ### IMPORT THE CSV FILE
 ### CSV FILE CREATED IN EXCEL 2016 AND SAVED AS "CSV (Comma delimited)(*.csv)
 
 ### WHEN OPENED WITH NOTEPAD THE CONTENT IS
-### userid;username;password;rolename
-### test1;username1;password1;[Other]
-### test2;username2;password2;[Guest]
+### userid;username;rolename
+### test1;username1;[Other]
+### test2;username2;[Guest]
+### PASSWORD IS GENERATED VIA PASSWORD GENERATOR
+#######################################################################
+
 with open('localusers.csv', 'r') as file:
     reader = csv.DictReader(file, delimiter=';')
     user_list = []
     for line in reader:
         user_list.append(line)
 
+        ####################################################################
+        ###  PASSWORD GENERATOR FOR 15 CHARACTERS
+        ####################################################################
+        uppercase = (string.ascii_uppercase)
+        lowercase = (string.ascii_lowercase)
+        number = (string.digits)
+        symbols = (string.punctuation)
+
+        strong = uppercase + lowercase + number + symbols
+
+        generated_password = "".join(random.sample(strong, 15))
+
+        ####################################################################
         ### DEFINE BASE URL FOR ADDING LOCAL USERS
+        ####################################################################
         url = "https://" + clearpass_fqdn + "/api/local-user"
 
+        ####################################################################
         ### DEFINE THE HEADER PARAMETERS
+        ####################################################################
         headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
 
+        ####################################################################
         ### DEFINE THE PAYLOAD
-        payload = {'user_id': line['userid'], 'username': line['username'], 'password': line['password'],
+        ####################################################################
+        payload = {'user_id': line['userid'], 'username': line['username'], 'password': generated_password,
                    'role_name': line['rolename']}
+
+        ####################################################################
         ### ADD THE USER
+        ####################################################################
         while True:
             post_user = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
             if post_user.status_code == 201:
 
                 print("USER {} WAS CREATED SUCCESSFULLY".format(line['userid']))
+                print("PASSWORD IS {}".format(generated_password))
                 print("")
                 break
             else:
