@@ -3,7 +3,7 @@ from docx.shared import Inches
 
 document = Document()
 
-document.add_picture('guest_passes/logo_gsg.jpg', width=Inches(4.00))
+document.add_picture('../guests/guest_passes/logo_gsg.jpg', width=Inches(4.00))
 document.add_heading('Gast gebruiker', 0)
 
 p = document.add_paragraph('Onderstaand worden de account details voor deze week weergegeven.')
@@ -30,5 +30,5 @@ hdr_cells[1].text = 'Id'
 
 
 document.add_page_break()
-
-document.save('guest_passes/{}.docx'.format(username))
+username = "test_document"
+document.save('../guests/guest_passes/{}.docx'.format(username))
