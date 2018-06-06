@@ -172,12 +172,48 @@ if print_user == 'y':
     pprint.pprint(get_local_user.json())
     print("")
     print("CONFIGURED GUEST USERS")
-    print("=====================+")
+    print("======================")
     for key in get_local_user.json()['_embedded']['items']:
-        print("User: {:<15} has username: {:<18} and role: {}".format(key['visitor_name'], key['username'],
+        print("Guest User: {:<18} has username: {:<18} and role: {}".format(key['visitor_name'], key['username'],
                                                                         key['role_name']))
-    print("")
+        print("Current Status: {}".format(key['current_state']))
+        print("")
 else:
     print("")
     print("OKAY, LET'S MOVE ON!!")
     print("")
+
+
+####################################################################
+###  DELETE A USER
+####################################################################
+
+print("")
+print("LET US REMOVE A GUEST USER")
+print("==========================")
+print("")
+
+while True:
+        add_user = str(input('Would you like to remove a user (y/n): '))
+        if add_user.lower() not in ('y' , 'n'):
+            print("Not an appropriate choice. Choose 'y' or 'n'!")
+        else:
+            break
+
+if add_user == 'y':
+    print("")
+    get_username = str(input('Provide Username: '))
+    url = "https://" + clearpass_fqdn + "/api/guest/username/" + get_username
+    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
+    while True:
+        delete_user = requests.delete(url, headers=headers, verify=False, timeout=2)
+        if delete_user.status_code == 204:
+            print("USER {} WAS DELETE SUCCESSFULLY".format(get_username))
+            break
+        else:
+            print("SOMETHING WENT WRONG! ERROR CODE = {}".format(delete_user.status_code))
+            print("")
+            break
+else:
+    print("")
+    print("OKAY, NO PROBLEM. GOODBYE!")
