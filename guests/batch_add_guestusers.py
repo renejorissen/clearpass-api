@@ -233,8 +233,13 @@ with open('guests.csv', 'r') as file:
                 print("PASSWORD IS {}".format(generated_password))
                 print("")
 
-                activated_on = datetime.datetime.time(line['start_time'])
-                expired_on = datetime.datetime.fromtimestamp(line['expire_time'])
+                timestamp = line['start_time']
+                value = datetime.datetime.time(timestamp)
+                activated_on = value.strftime('%Y-%m-%d %H:%M:%S')
+
+                timestamp = line['expire_time']
+                value = datetime.datetime.time(timestamp)
+                expired_on = value.strftime('%Y-%m-%d %H:%M:%S')
 
                 ####################################################################
                 ### PRINT OUTPUT TO WORD FILE
@@ -256,8 +261,8 @@ with open('guests.csv', 'r') as file:
                 cells = table.add_row().cells
                 cells[0].text = line['username']
                 cells[1].text = generated_password
-                cells[2].text = activated_on.strftime('%Y-%m-%d %H:%M:%S')
-                cells[3].text = expired_on.strftime('%Y-%m-%d %H:%M:%S')
+                cells[2].text = activated_on
+                cells[3].text = expired_on
                 document.add_page_break()
 
                 document.save('guest_passes/{}.docx'.format(line['description']))
