@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #------------------------------------------------------------------------------
 #
-# Script to "play" with time for guest accounts
+# Script to "play" with time structures
 #
 #------------------------------------------------------------------------------
 
@@ -36,4 +36,5 @@ print(epoch3)
 
 timestamp = 1532296800
 value = datetime.datetime.fromtimestamp(timestamp)
-print(value.strftime('%Y-%m-%d %H:%M:%S'))
+time = value.strftime('%Y-%m-%d %H:%M:%S')
+print("time is ", time)
