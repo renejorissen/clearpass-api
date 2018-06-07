@@ -230,15 +230,18 @@ with open('guests.csv', 'r') as file:
             post_user = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
             if post_user.status_code == 201:
                 print("USER {} WAS CREATED SUCCESSFULLY".format(line['username']))
-                print("PASSWORD IS {}".format(generated_password))
+                print("INFO WILL BE WRITTEN TO WORD DOCUMENT IN GUEST_PASSES DIRECTORY: {}.docx".format(line['description']))
                 print("")
 
-                timestamp = line['start_time']
-                value = datetime.datetime.time(timestamp)
+                ####################################################################
+                ### CONVERT EPOCH TO HUMAN READABLE FORMAT
+                ####################################################################
+                timestamp = int(line['start_time'])
+                value = datetime.datetime.fromtimestamp(timestamp)
                 activated_on = value.strftime('%Y-%m-%d %H:%M:%S')
 
-                timestamp = line['expire_time']
-                value = datetime.datetime.time(timestamp)
+                timestamp = int(line['expire_time'])
+                value = datetime.datetime.fromtimestamp(timestamp)
                 expired_on = value.strftime('%Y-%m-%d %H:%M:%S')
 
                 ####################################################################
@@ -246,7 +249,7 @@ with open('guests.csv', 'r') as file:
                 ####################################################################
                 document = Document()
 
-                document.add_picture('guest_passes/logo_gsg.jpg', width=Inches(4.00))
+                document.add_picture('guest_passes/logo_4ip.jpg', width=Inches(4.00))
                 document.add_heading('Gast gebruiker', 0)
 
                 p = document.add_paragraph('Onderstaand worden de account details voor deze week weergegeven.')
@@ -263,9 +266,8 @@ with open('guests.csv', 'r') as file:
                 cells[1].text = generated_password
                 cells[2].text = activated_on
                 cells[3].text = expired_on
-                document.add_page_break()
 
-                document.save('guest_passes/{}.docx'.format(line['description']))
+                document.save('guest_passes/{} 2018.docx'.format(line['description']))
                 break
             else:
                 print("SOMETHING WENT WRONG! ERROR CODE = {}".format(post_user.status_code))
