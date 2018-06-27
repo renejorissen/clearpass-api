@@ -201,10 +201,11 @@ with open('guests.csv', 'r') as file:
         number = (string.digits)
         symbols = (string.punctuation)
 
+        very_simple = lowercase + number
         simple = uppercase + lowercase + number
         strong = uppercase + lowercase + number + symbols
 
-        generated_password = "".join(random.sample(simple, 10))
+        generated_password = "".join(random.sample(very_simple, 6))
 
         ####################################################################
         ### DEFINE BASE URL FOR ADDING LOCAL USERS
@@ -219,8 +220,8 @@ with open('guests.csv', 'r') as file:
         ####################################################################
         ### DEFINE THE PAYLOAD
         ####################################################################
-        payload = {'email': line['email'], 'username': line['username'], 'role_id': line['role_id'], 'simultaneous_use': line['simultaneous_use'],
-                   'enabled': line['enabled'], 'start_time': line['start_time'], 'expire_time': line['expire_time'], 'password': generated_password}
+        payload = {'email': line['email'], 'password': generated_password, 'username': line['username'], 'role_id': line['role_id'], 'simultaneous_use': line['simultaneous_use'],
+                   'enabled': line['enabled'], 'start_time': line['start_time'], 'expire_time': line['expire_time']}
         #print(payload)
 
         ####################################################################
