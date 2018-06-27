@@ -1,5 +1,4 @@
 username;email;role_id;enabled;start_time;expire_time;simultaneous_use;description
-gast@week26;gast@week26;2;TRUE;1529877600;1530482400;0;week 26
 gast@week27;gast@week27;2;TRUE;1530482400;1531087200;0;week 27
 gast@week28;gast@week28;2;TRUE;1531087200;1531692000;0;week 28
 gast@week29;gast@week29;2;TRUE;1531692000;1532296800;0;week 29
