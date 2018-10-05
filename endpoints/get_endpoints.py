@@ -156,135 +156,29 @@ api_privs = get_privs_response['privileges']
 
 
 ####################################################################
-###  PRINT LOCAL USERS
+###  PRINT ENDPOINTS
 ####################################################################
 
 while True:
-        print_user = str(input('Get all local users (y/n)? '))
-        if print_user.lower() not in ('y' , 'n'):
+        print_endpoint = str(input('Get all endpoints (y/n)? '))
+        if print_endpoint.lower() not in ('y' , 'n'):
             print("Not an appropriate choice. Choose 'y' or 'n'!")
         else:
             break
 
-if print_user == 'y':
-    url = "https://" + clearpass_fqdn + "/api/local-user"
+if print_endpoint == 'y':
+    url = "https://" + clearpass_fqdn + "/api/endpoint"
     headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
-    get_local_user = requests.get(url, headers=headers, verify=False, timeout=2)
-    # pprint.pprint(get_local_user.json())
+    get_endpoint = requests.get(url, headers=headers, verify=False, timeout=2)
+    #pprint.pprint(get_endpoint.json())
     print("")
-    print("CONFIGURED LOCAL USERS")
+    print("CONFIGURED ENDPOINTS")
     print("=====================")
-    for key in get_local_user.json()['_embedded']['items']:
-        print("User ID: {:<15} has username: {:<18} and role: {}".format(key['user_id'], key['username'],
-                                                                         key['role_name']))
+    for key in get_endpoint.json()['_embedded']['items']:
+        print("Endpoint ID: {:<15} has MAC address: {:<18} and status: {}".format(key['id'], key['mac_address'],
+                                                                         key['status']))
     print("")
 else:
     print("")
     print("OKAY, LET'S MOVE ON!!")
     print("")
-
-
-
-####################################################################
-###  PRINT ROLES
-####################################################################
-
-while True:
-        print_role = str(input('Get all roles (y/n)? '))
-        if print_role.lower() not in ('y' , 'n'):
-            print("Not an appropriate choice. Choose 'y' or 'n'!")
-        else:
-            break
-
-if print_role == 'y':
-    url = "https://" + clearpass_fqdn + "/api/role"
-    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
-    get_roles = requests.get(url, headers=headers, verify=False, timeout=2)
-    print("")
-    # pprint.pprint(get_roles.json())
-    print("CONFIGURED ROLES")
-    print("================")
-    for key in get_roles.json()['_embedded']['items']:
-        print("Role ID: {:<7} has name: {:<10}".format(key['id'], key['name']))
-else:
-    print("")
-    print("OKAY, LET'S MOVE ON!!")
-
-
-####################################################################
-###  ADD A USER
-####################################################################
-
-print("")
-print("LET US ADD A LOCAL USER")
-print("=======================")
-print("")
-
-while True:
-        add_user = str(input('Would you like to add a new user (y/n): '))
-        if add_user.lower() not in ('y' , 'n'):
-            print("Not an appropriate choice. Choose 'y' or 'n'!")
-        else:
-            break
-
-if add_user == 'y':
-    get_username = str(input('Provide username: '))
-    get_password = str(input('Provide password: '))
-    get_rolename = str(input('Provide role name: '))
-    url = "https://" + clearpass_fqdn + "/api/local-user"
-    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
-    payload = {'user_id': get_username, 'username': get_username, 'password': get_password, 'role_name': get_rolename}
-    while True:
-        post_user = requests.post(url, headers=headers, json=payload, verify=False, timeout=2)
-        if post_user.status_code == 201:
-            print("USER {} WAS CREATED SUCCESSFULLY".format(get_username))
-            break
-        else:
-            print("SOMETHING WENT WRONG! ERROR CODE = {}".format(post_user.status_code))
-            print("")
-            print("401 - Unauthorized")
-            print("403 - Forbidden")
-            print("406 - Not Acceptable")
-            print("415 - Unsupported Media Type")
-            print("422 - Unprocessable Entity")
-            print("")
-            print("LETS TRY AGAIN")
-            print("")
-            break
-else:
-    print("")
-    print("OKAY, LET'S MOVE ON!!")
-
-
-####################################################################
-###  REMOVE A USER
-####################################################################
-
-print("")
-print("LET US REMOVE A LOCAL USER")
-print("=======================")
-print("")
-
-while True:
-        add_user = str(input('Would you like to remove a user (y/n): '))
-        if add_user.lower() not in ('y' , 'n'):
-            print("Not an appropriate choice. Choose 'y' or 'n'!")
-        else:
-            break
-
-if add_user == 'y':
-    get_username = str(input('Provide User ID: '))
-    url = "https://" + clearpass_fqdn + "/api/local-user/user-id/" + get_username
-    headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
-    while True:
-        delete_user = requests.delete(url, headers=headers, verify=False, timeout=2)
-        if delete_user.status_code == 204:
-            print("USER {} WAS DELETE SUCCESSFULLY".format(get_username))
-            break
-        else:
-            print("SOMETHING WENT WRONG! ERROR CODE = {}".format(delete_user.status_code))
-            print("")
-            break
-else:
-    print("")
-    print("OKAY, NO PROBLEM. GOODBYE!")
