@@ -182,3 +182,21 @@ else:
     print("")
     print("OKAY, LET'S MOVE ON!!")
     print("")
+
+####################################################################
+###  FIND ENDPOINTS WITH ATTRIBUTE X
+####################################################################
+
+while True:
+        print_find_endpoint = str(input('Would you like to find a specific endpoint(s) (y/n)? '))
+        if print_find_endpoint.lower() not in ('y' , 'n'):
+            print("Not an appropriate choice. Choose 'y' or 'n'!")
+        else:
+            break
+
+if print_find_endpoint == 'y':
+    print("TEST")
+else:
+    print("")
+    print("OKAY, LET'S MOVE ON!!")
+    print("")
