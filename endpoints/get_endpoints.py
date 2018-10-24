@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #------------------------------------------------------------------------------
 #
-# Script to list Local Users, Role and/or
-# Add / Delete Local Users
+# Script to get all Endpoints and Endpoints with Attribute Source:MobileIron
+# and total number of endpoints
 #
 #------------------------------------------------------------------------------
 
@@ -12,6 +12,7 @@ from configparser import ConfigParser
 import os
 import urllib3
 import pprint
+from html import escape
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -167,7 +168,7 @@ while True:
             break
 
 if print_endpoint == 'y':
-    url = "https://" + clearpass_fqdn + "/api/endpoint"
+    url = "https://" + clearpass_fqdn + "/api/endpoint?calculate_count=true"
     headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
     get_endpoint = requests.get(url, headers=headers, verify=False, timeout=2)
     #pprint.pprint(get_endpoint.json())
@@ -178,25 +179,33 @@ if print_endpoint == 'y':
         print("Endpoint ID: {:<15} has MAC address: {:<18} and status: {}".format(key['id'], key['mac_address'],
                                                                          key['status']))
     print("")
+    total_count = str(get_endpoint.json()['count'])
+    print("TOTAL NUMBERS OF ENDPOINTS: " + total_count)
 else:
     print("")
     print("OKAY, LET'S MOVE ON!!")
     print("")
 
 ####################################################################
-###  FIND ENDPOINTS WITH ATTRIBUTE X
+###  FIND ENDPOINTS WITH ATTRIBUTE SOURCE:MOBILEIRON
 ####################################################################
 
-while True:
-        print_find_endpoint = str(input('Would you like to find a specific endpoint(s) (y/n)? '))
-        if print_find_endpoint.lower() not in ('y' , 'n'):
-            print("Not an appropriate choice. Choose 'y' or 'n'!")
-        else:
-            break
+filter_string = str("%7B%22Source%22%3A%20%22MobileIron%22%7D&limit=25&calculate_count=true")
 
-if print_find_endpoint == 'y':
-    print("TEST")
-else:
-    print("")
-    print("OKAY, LET'S MOVE ON!!")
-    print("")
+url = "https://" + clearpass_fqdn + "/api/endpoint?filter=" + filter_string
+#print(url)
+headers = {'Accept': 'application/json', "Authorization": "{} {}".format(token_type, access_token)}
+get_endpoint = requests.get(url, headers=headers, verify=False, timeout=2)
+#pprint.pprint(get_endpoint.json())
+
+print("Finding endpoints with attribute Source:MobileIron")
+print("")
+for key in get_endpoint.json()['_embedded']['items']:
+    print("Endpoint ID: {:<15} has MAC address: {:<18} and MDM Source is {}".format(key['id'], key['mac_address'], key['attributes']['Source']))
+print("")
+
+####################################################################
+### COUNT IS GET VIA "CALCULATE_COUNT=TRUE" IN FILTER_STRING
+####################################################################
+total_count = str(get_endpoint.json()['count'])
+print("TOTAL NUMBERS OF ENDPOINTS: " + total_count)
