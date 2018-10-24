@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 #------------------------------------------------------------------------------
 #
-# Script to list Local Users, Role and/or
-# Add / Delete Local Users
+# Script to list get endpoints with predefined Attribute Source:MobileIron
+# Delete the endpoint and poll context server to import endpoints from MobileIron
 #
 #------------------------------------------------------------------------------
 
